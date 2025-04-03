@@ -4,8 +4,8 @@ info:
   description: Sample api for the interview task
   version: 0.0.1
   contact:
-    name: 'Michał Piotrowski'
-    email: 'michal.piotrowski@ingenious.build'
+    name: "Michał Piotrowski"
+    email: "michal.piotrowski@ingenious.build"
 servers:
   - url: http://localhost:3000
 paths:
@@ -13,9 +13,9 @@ paths:
     get:
       summary: Returns a list of stops with time and line.
       tags:
-        - 'Stops'
+        - "Stops"
       responses:
-        '200':
+        "200":
           description: A JSON array of stops
           content:
             application/json:
@@ -29,10 +29,10 @@ paths:
                       example: 100
                     stop:
                       type: string
-                      example: '3 Maja'
+                      example: "3 Maja"
                     order:
                       type: number
                       example: 1
                     time:
                       type: string
-                      example: '14:04'
+                      example: "14:04"

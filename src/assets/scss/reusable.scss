@@ -1,0 +1,13 @@
+.sort-icon {
+  cursor: pointer;
+  transition: rotate 0.25s ease;
+
+  &.dsc {
+    rotate: 180deg;
+  }
+}
+
+.error__info {
+  font-size: var(--font-sm);
+  padding: 24px;
+}

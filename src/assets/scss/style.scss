@@ -1,0 +1,26 @@
+/* Default page styles */
+@import "./default.scss";
+
+/* Fonts */
+@import "./fonts.scss";
+
+/* Reusable */
+@import "./reusable.scss";
+
+/* Bootstrap */
+@import url("bootstrap/dist/css/bootstrap.min.css");
+
+/* Animations */
+@import "./animations.scss";
+
+/* Custom variables */
+@import "./variables.scss";
+
+/* Components */
+@import "./components/modal/notification-modal.scss";
+@import "./components/layout/timetable.scss";
+@import "./components/loader/loader.scss";
+@import "./components/tabs/tabs.scss";
+@import "./components/bus-lines/bus-lines.scss";
+@import "./components/bus-stops/bus-stops.scss";
+@import "./components/bus-stops/search/search.scss";

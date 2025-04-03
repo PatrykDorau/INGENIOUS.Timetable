@@ -1,0 +1,44 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #eee !important;
+  font-family: "Inter", system-ui, -apple-system !important;
+  height: 100dvh;
+
+  @media (max-width: 768px) {
+    height: auto;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  position: relative;
+}
+
+a {
+  &:hover {
+    color: var(--blue-00);
+  }
+}
+
+p {
+  margin-bottom: 0;
+}
+
+#app {
+  height: 100%;
+}
+
+button {
+  outline: none;
+  border: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px white;
+}

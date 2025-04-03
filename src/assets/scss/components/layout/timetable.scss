@@ -1,0 +1,19 @@
+.timetable {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 32px;
+}
+
+.timetable__title {
+  font-size: clamp(
+    var(--font-lg),
+    calc(100vw * var(--font-xl-numeric) / 768),
+    var(--font-xl)
+  );
+  line-height: 32px;
+  font-weight: 600;
+  color: var(--black-01);
+  // margin-bottom: 20px;
+}

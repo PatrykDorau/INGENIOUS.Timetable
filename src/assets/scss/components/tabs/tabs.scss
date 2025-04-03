@@ -1,0 +1,48 @@
+.tabs {
+  display: flex;
+  gap: 10px;
+  background-color: var(--white-00);
+  padding-inline: 24px;
+  border-radius: 4px;
+}
+
+.tabs__button {
+  position: relative;
+  display: block;
+  padding: 20px;
+  border: none;
+  color: black;
+  text-decoration: none;
+  text-transform: capitalize;
+  cursor: pointer;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--grey-00);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin: auto;
+    height: 2px;
+    width: 0px;
+    background: transparent;
+    transition: width 0.5s ease, background-color 0.5s ease;
+  }
+}
+
+.tabs__button--active {
+  // border-bottom: 2px solid var(--blue-00);
+  color: var(--black-00);
+
+  &::after {
+    width: 100%;
+    background: var(--blue-00);
+  }
+}
