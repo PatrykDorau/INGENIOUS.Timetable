@@ -31,7 +31,7 @@ describe("Tabs.vue", () => {
     expect(tabs[0].props().data.active).toBe(false);
     expect(tabs[1].props().data.active).toBe(true);
 
-    await router.push("/bus-lines");
+    await router.push("/lines");
     await router.isReady();
 
     tabs = wrapper.findAllComponents(TabItem);

@@ -6,24 +6,26 @@
     <template v-else-if="activeLine && !activeStop">
       <DetailsPlaceholder text="Please select the stop line first" />
     </template>
-    <template v-else>
-      <p class="line-details__line">Bus stop: {{ activeStop?.stop }}</p>
-      <div class="line-details__list-title">Time</div>
-      <div class="line-details__list" ref="listContainer">
-        <TransitionGroup
-          name="fade-move"
-          appear
-          @after-enter="handleAnimationEnd"
-        >
-          <BusStopDetailsListItem
-            v-for="(time, index) in activeStop?.time"
-            :key="time + index"
-            :time="time"
-            :nearest="time === closestFutureTime"
-          />
-        </TransitionGroup>
-      </div>
-    </template>
+    <TransitionGroup name="fade">
+      <template v-if="activeStop && activeStop">
+        <p class="line-details__line">Bus stop: {{ activeStop?.stop }}</p>
+        <div class="line-details__list-title">Time</div>
+        <div class="line-details__list" ref="listContainer">
+          <TransitionGroup
+            name="fade-move"
+            appear
+            @after-enter="handleAnimationEnd"
+          >
+            <BusStopDetailsListItem
+              v-for="(time, index) in activeStop?.time"
+              :key="time + index"
+              :time="time"
+              :nearest="time === closestFutureTime"
+            />
+          </TransitionGroup>
+        </div>
+      </template>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -37,7 +39,8 @@ import {
   nextTick,
 } from "vue";
 import { useStore } from "vuex";
-import { StoreStateType, StopType } from "@/types/StoreTypes";
+import { StoreStateType } from "@/types/StoreTypes";
+import { StopType } from "@/types/BusDataTypes";
 import BusStopDetailsListItem from "./BusStopDetailsListItem.vue";
 import DetailsPlaceholder from "@/components/base/DetailsPlaceholder.vue";
 

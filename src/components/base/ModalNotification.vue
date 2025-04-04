@@ -24,7 +24,7 @@ import { NotificationType } from "@/types/ModalTypes";
 const store = useStore();
 
 const notificationData = computed<NotificationType>(
-  () => store.getters.getNotificationData
+  () => store.getters["notifications/getNotificationData"]
 );
 
 watch(
@@ -32,7 +32,8 @@ watch(
   () => {
     if (notificationData.value.active) {
       setTimeout(() => {
-        store.dispatch("fireModalMessage", {
+        // store.dispatch("fireModalMessage", {
+        store.dispatch("notifications/fireModalMessage", {
           title: "",
           text: "",
           type: "error",

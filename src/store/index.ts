@@ -1,31 +1,31 @@
 import { createStore } from "vuex";
 import ApiService from "@/services/ApiService";
-import {
-  StoreStateType,
-  LineType,
-  StopType,
-  UniqueStopType,
-  NotificationType,
-} from "../types/StoreTypes";
-import { StopsResponseType } from "../types/ApiTypes";
+import { StoreStateType } from "@/types/StoreTypes";
+import { LineType, StopType, UniqueStopType } from "@/types/BusDataTypes";
+import { StopsResponseType } from "@/types/ApiTypes";
+
+import notifications from "@/store/modules/notifications";
+import loading from "@/store/modules/loading";
 
 export default createStore<StoreStateType>({
   state: {
     stops: [],
     uniqueStops: [],
     lines: [],
-    notification: {
-      title: "",
-      text: "",
-      type: "error",
-      timer: 10000,
-      active: false,
-    },
-    loadInProgress: true,
     activeLine: undefined,
     activeStop: undefined,
-    activeLineStopsSortDirection: "asc",
+    activeLineStopsSortDirection: "dsc",
     uniqueStopsSortDirection: "dsc",
+    loading: { loadInProgress: true },
+    notifications: {
+      notification: {
+        title: "",
+        text: "",
+        type: "error",
+        timer: 10000,
+        active: false,
+      },
+    },
   },
   getters: {
     getStops: (state): StopsResponseType[] => state.stops,
@@ -37,8 +37,6 @@ export default createStore<StoreStateType>({
       state.activeLineStopsSortDirection,
     getUniqueStopsSortDirection: (state): "asc" | "dsc" =>
       state.uniqueStopsSortDirection,
-    getLoading: (state): boolean => state.loadInProgress,
-    getNotificationData: (state): NotificationType => state.notification,
   },
   mutations: {
     SET_UNIQUE_STOPS(state, data: StopsResponseType[]) {
@@ -51,8 +49,6 @@ export default createStore<StoreStateType>({
         ).values()
       );
 
-      uniqueStops.sort((a, b) => a.order - b.order);
-
       state.uniqueStops = uniqueStops;
     },
     SET_STOPS(state, stops: StopsResponseType[]) {
@@ -61,17 +57,11 @@ export default createStore<StoreStateType>({
     SET_LINES(state, lines: LineType[]) {
       state.lines = lines;
     },
-    SET_LOADING(state, loading: boolean) {
-      state.loadInProgress = loading;
-    },
     SET_ACTIVE_LINE(state, line: LineType) {
       state.activeLine = line;
     },
     SET_ACTIVE_STOP(state, stop: StopType) {
       state.activeStop = stop;
-    },
-    MANAGE_NOTIFICATION(state, data: NotificationType) {
-      state.notification = data;
     },
     SET_UNIQUE_STOPS_SORT_DIR(state, dir: "asc" | "dsc") {
       state.uniqueStopsSortDirection = dir;
@@ -81,26 +71,23 @@ export default createStore<StoreStateType>({
     },
   },
   actions: {
-    fireModalMessage({ commit }, data: NotificationType) {
-      commit("MANAGE_NOTIFICATION", data);
-    },
-
     async fetchStops({ state, commit, dispatch }) {
-      commit("SET_LOADING", true);
+      dispatch("loading/setLoading", true);
       if (state.stops.length > 0 && state.lines.length > 0) {
-        commit("SET_LOADING", false);
+        dispatch("loading/setLoading", false);
         return;
       }
 
       try {
-        const response = await ApiService.get("/stops");
+        const response = await ApiService.get<StopsResponseType[]>("/stops");
         const stopsData = response.data;
 
         commit("SET_STOPS", stopsData);
 
         const lines: LineType[] = [];
 
-        commit("SET_UNIQUE_STOPS", response.data);
+        commit("SET_UNIQUE_STOPS", stopsData);
+        dispatch("sortUniqueStops");
 
         stopsData.forEach((stop) => {
           const line = lines.find((li) => li.line === stop.line);
@@ -147,7 +134,8 @@ export default createStore<StoreStateType>({
 
         commit("SET_LINES", lines);
       } catch (error) {
-        dispatch("fireModalMessage", {
+        console.log("error");
+        dispatch("notifications/fireModalMessage", {
           title: "Error",
           text: "Failed to load data, please refresh page. If problem persists, contact us at page@admin.com",
           type: "error",
@@ -155,7 +143,7 @@ export default createStore<StoreStateType>({
           active: true,
         });
       } finally {
-        commit("SET_LOADING", false);
+        dispatch("loading/setLoading", false);
       }
     },
 
@@ -194,6 +182,8 @@ export default createStore<StoreStateType>({
       const activeLine = { ...state.activeLine };
       const sortAscending = state.activeLineStopsSortDirection === "asc";
 
+      console.log(state.activeLineStopsSortDirection);
+
       activeLine.stops = [...activeLine.stops].sort((a, b) =>
         sortAscending ? b.order - a.order : a.order - b.order
       );
@@ -208,12 +198,15 @@ export default createStore<StoreStateType>({
       const sortAscending = state.uniqueStopsSortDirection === "asc";
 
       const uniqueStops = [...state.uniqueStops].sort((a, b) =>
-        sortAscending ? a.order - b.order : b.order - a.order
+        sortAscending ? b.order - a.order : a.order - b.order
       );
 
       commit("SET_UNIQUE_STOPS", uniqueStops);
       commit("SET_UNIQUE_STOPS_SORT_DIR", sortAscending ? "dsc" : "asc");
     },
   },
-  modules: {},
+  modules: {
+    notifications,
+    loading,
+  },
 });

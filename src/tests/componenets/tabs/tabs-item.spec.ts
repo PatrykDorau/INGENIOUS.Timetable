@@ -44,7 +44,7 @@ describe("TabItem.vue", () => {
         data: {
           id: 2,
           name: "Bus Lines",
-          to: "/bus-lines",
+          to: "/lines",
           active: false,
         },
       },

@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { Tab } from "../../types/TabTypes";
+import { Tab } from "@/types/TabTypes";
 import TabItem from "./TabItem.vue";
 
 import { useRoute } from "vue-router";
@@ -17,8 +17,8 @@ const tabs = ref<Tab[]>([
   {
     id: 1,
     name: "Bus lines",
-    to: "/bus-lines",
-    active: route.path == "/bus-lines",
+    to: "/lines",
+    active: route.path == "/lines",
   },
   {
     id: 2,

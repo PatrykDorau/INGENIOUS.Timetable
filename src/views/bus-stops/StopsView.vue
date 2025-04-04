@@ -18,7 +18,7 @@ import LoaderComponent from "@/components/loader/LoaderComponent.vue";
 
 const store = useStore<StoreStateType>();
 
-const loading = computed(() => store.getters.getLoading);
+const loading = computed<boolean>(() => store.getters["loading/getLoading"]);
 
 let searchValue = ref("");
 

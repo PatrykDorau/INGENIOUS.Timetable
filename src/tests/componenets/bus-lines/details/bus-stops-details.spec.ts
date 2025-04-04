@@ -4,7 +4,7 @@ import { createStore } from "vuex";
 import BusDetails from "@/components/bus-lines/details/BusStopDetails.vue";
 import DetailsPlaceholder from "@/components/base/DetailsPlaceholder.vue";
 import BusStopDetailsListItem from "@/components/bus-lines/details/BusStopDetailsListItem.vue";
-import { LineType, StopType } from "@/types/StoreTypes";
+import { LineType, StopType } from "@/types/BusDataTypes";
 
 const mockStore = (activeLine?: LineType, activeStop?: StopType) => {
   return createStore({
@@ -74,6 +74,10 @@ describe("BusStopDetails.vue", () => {
   });
 
   it("updates closest future time correctly", async () => {
+    await vi.useFakeTimers();
+
+    vi.setSystemTime(new Date("2023-06-01T22:31:00"));
+
     store = mockStore(
       {
         line: 1,
@@ -82,7 +86,7 @@ describe("BusStopDetails.vue", () => {
           { stop: "Stop A", time: ["11:00", "10:00"], order: 1, active: true },
         ],
       },
-      { stop: "Stop A", time: ["10:00", "23:30"], order: 1, active: true }
+      { stop: "Stop A", time: ["7:35", "23:59"], order: 1, active: true }
     );
     const wrapper = mount(BusDetails, {
       global: {
@@ -92,12 +96,12 @@ describe("BusStopDetails.vue", () => {
         sortDir: "asc",
       },
     });
-    vi.setSystemTime(new Date("2023-06-01T22:31:00"));
 
     wrapper.vm.$nextTick();
+
     const activeTimeElement = wrapper.find(".stop-details__list-item--nearest");
 
     expect(activeTimeElement.exists()).toBe(true);
-    expect(activeTimeElement.text()).toBe("23:30");
+    expect(activeTimeElement.text()).toBe("23:59");
   });
 });

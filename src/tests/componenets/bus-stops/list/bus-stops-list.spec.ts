@@ -4,25 +4,38 @@ import { describe, it, expect, vi } from "vitest";
 import BusStopsList from "@/components/bus-stops/list/BusStopsList.vue";
 import BusStopsListItem from "@/components/bus-stops/list/BusStopsListItem.vue";
 import IconComponent from "@/components/base/IconComponent.vue";
-import { UniqueStopType } from "@/types/StoreTypes";
-
-type TempStoreType = {
-  uniqueStops: UniqueStopType[];
-  uniqueStopsSortDirection: "asc" | "dsc";
-  loadInProgress: boolean;
-};
+import { UniqueStopType } from "@/types/BusDataTypes";
 
 const createMockStore = (uniqueStops: UniqueStopType[]) => {
-  return createStore<TempStoreType>({
+  return createStore({
+    modules: {
+      loading: {
+        namespaced: true,
+        state: {
+          loadInProgress: false,
+        },
+        getters: {
+          getLoading: (state) => state.loadInProgress,
+        },
+        mutations: {
+          SET_LOADING(state, loading: boolean) {
+            state.loadInProgress = loading;
+          },
+        },
+        actions: {
+          setLoading({ commit }, loading: boolean) {
+            commit("SET_LOADING", loading);
+          },
+        },
+      },
+    },
     state: {
-      uniqueStops: uniqueStops,
+      uniqueStops,
       uniqueStopsSortDirection: "asc",
-      loadInProgress: false,
     },
     getters: {
       getUniqueStops: (state) => state.uniqueStops,
       getUniqueStopsSortDirection: (state) => state.uniqueStopsSortDirection,
-      getLoading: (state) => state.loadInProgress,
     },
     actions: {
       sortUniqueStops: vi.fn(),
@@ -45,7 +58,7 @@ describe("BusStopsList.vue", () => {
 
     expect(wrapper.find(".error__info").exists()).toBe(true);
     expect(wrapper.find(".error__info").text()).toContain(
-      "No stops found, contact the page administrator"
+      "No stops found, please refresh the page. If problem persists, contact us at page@admin.com."
     );
   });
 
@@ -61,7 +74,7 @@ describe("BusStopsList.vue", () => {
     expect(mockedStore.dispatch).toHaveBeenCalledWith("sortUniqueStops");
   });
 
-  it("filters stops based on search value", async () => {
+  it("filters stops based on two words search value", async () => {
     mockedStore = createMockStore([
       { stop: "Stop A", order: 1 },
       { stop: "Stop B", order: 2 },
@@ -70,14 +83,31 @@ describe("BusStopsList.vue", () => {
 
     const wrapper = mount(BusStopsList, {
       global: { plugins: [mockedStore] },
-      props: { searchValue: "Stop B" },
+      props: { searchValue: "Stop A" },
     });
 
     wrapper.vm.$nextTick();
 
-    expect(wrapper.findAllComponents(BusStopsListItem)).toHaveLength(1);
-    expect(wrapper.findComponent(BusStopsListItem).props("data").stop).toBe(
-      "Stop B"
-    );
+    const filteredItems = await wrapper.findAllComponents(BusStopsListItem);
+    expect(filteredItems).toHaveLength(1);
+    expect(filteredItems[0].props("data").stop).toBe("Stop A");
+  });
+
+  it("filters stops based on one word search value", async () => {
+    mockedStore = createMockStore([
+      { stop: "Stop A", order: 1 },
+      { stop: "Stop B", order: 2 },
+      { stop: "Stop C", order: 3 },
+    ]);
+
+    const wrapper = mount(BusStopsList, {
+      global: { plugins: [mockedStore] },
+      props: { searchValue: "Stop" },
+    });
+
+    wrapper.vm.$nextTick();
+
+    const filteredItems = await wrapper.findAllComponents(BusStopsListItem);
+    expect(filteredItems).toHaveLength(3);
   });
 });

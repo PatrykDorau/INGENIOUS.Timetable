@@ -11,7 +11,8 @@
 <script setup lang="ts">
 import { defineProps } from "vue";
 import { useStore } from "vuex";
-import { StoreStateType, StopType } from "@/types/StoreTypes";
+import { StoreStateType } from "@/types/StoreTypes";
+import { StopType } from "@/types/BusDataTypes";
 
 const store = useStore<StoreStateType>();
 

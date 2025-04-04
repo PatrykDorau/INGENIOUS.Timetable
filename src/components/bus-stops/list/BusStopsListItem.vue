@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { defineProps } from "vue";
-import { UniqueStopType } from "@/types/StoreTypes";
+import { UniqueStopType } from "@/types/BusDataTypes";
 
 const props = defineProps<{ data: UniqueStopType }>();
 </script>

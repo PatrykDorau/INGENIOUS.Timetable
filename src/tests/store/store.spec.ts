@@ -1,8 +1,8 @@
-import store from "@/store";
-import ApiService from "@/services/ApiService";
-import { describe, it, expect, beforeEach, vi, MockedFunction } from "vitest";
 import { StopsResponseType } from "@/types/ApiTypes";
 import { AxiosResponse } from "axios";
+import { beforeEach, describe, it, expect, vi, MockedFunction } from "vitest";
+import ApiService from "@/services/ApiService";
+import store from "@/store/index";
 
 vi.mock("@/services/ApiService", () => ({
   default: {
@@ -10,85 +10,129 @@ vi.mock("@/services/ApiService", () => ({
   },
 }));
 
-describe("Vuex Store Logic", () => {
+vi.mock("@/store/modules/notifications", () => ({
+  default: {
+    fireModalMessage: vi.fn(),
+  },
+}));
+
+vi.mock("@/store/modules/loading", () => ({
+  default: {
+    setLoading: vi.fn(),
+  },
+}));
+
+describe("Vuex Store", () => {
   let apiGetMock: MockedFunction<typeof ApiService.get>;
 
   beforeEach(() => {
-    store.replaceState({
-      stops: [],
-      uniqueStops: [],
-      lines: [],
-      notification: {
-        title: "",
-        text: "",
-        type: "error",
-        timer: 10000,
-        active: false,
-      },
-      loadInProgress: true,
-      activeLine: undefined,
-      activeStop: undefined,
-      activeLineStopsSortDirection: "asc",
-      uniqueStopsSortDirection: "dsc",
-    });
-
     apiGetMock = ApiService.get as MockedFunction<typeof ApiService.get>;
     apiGetMock.mockReset();
   });
 
-  it("should set stops", () => {
-    store.commit("SET_STOPS", [{ stop: "A", order: 1 }]);
-    expect(store.state.stops).toEqual([{ stop: "A", order: 1 }]);
+  describe("getters", () => {
+    it("should return the correct stops", () => {
+      const stops = [{ stop: "Stop 1", order: 1, line: 100, time: "10:00" }];
+      store.state.stops = stops;
+      expect(store.getters.getStops).toEqual(stops);
+    });
+
+    it("should return the correct uniqueStops", () => {
+      const uniqueStops = [{ stop: "Stop 1", order: 1 }];
+      store.state.uniqueStops = uniqueStops;
+      expect(store.getters.getUniqueStops).toEqual(uniqueStops);
+    });
   });
 
-  it("should toggle loading state", () => {
-    store.commit("SET_LOADING", true);
-    expect(store.state.loadInProgress).toBe(true);
+  describe("mutations", () => {
+    it("SET_UNIQUE_STOPS should set uniqueStops correctly", () => {
+      const stopsData = [
+        { stop: "Stop 1", order: 2 },
+        { stop: "Stop 2", order: 1 },
+        { stop: "Stop 2", order: 1 },
+      ];
+      store.commit("SET_UNIQUE_STOPS", stopsData);
+      expect(store.state.uniqueStops).toEqual([
+        { stop: "Stop 1", order: 2 },
+        { stop: "Stop 2", order: 1 },
+      ]);
+    });
 
-    store.commit("SET_LOADING", false);
-    expect(store.state.loadInProgress).toBe(false);
+    it("SET_STOPS should set stops correctly", () => {
+      const stopsData = [{ stop: "Stop 1", order: 1 }];
+      store.commit("SET_STOPS", stopsData);
+      expect(store.state.stops).toEqual(stopsData);
+    });
   });
 
-  it("should sort unique stops correctly", () => {
-    store.commit("SET_UNIQUE_STOPS", [
-      { stop: "B", order: 2 },
-      { stop: "A", order: 1 },
-    ]);
-    store.dispatch("sortUniqueStops");
+  describe("actions", () => {
+    it("fetchStops should fetch data and update store", async () => {
+      const stopsData = [
+        { stop: "Stop 1", line: 1, order: 1, time: "10:00" },
+        { stop: "Stop 2", line: 1, order: 2, time: "10:30" },
+      ];
+      apiGetMock.mockResolvedValue({
+        data: stopsData,
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {},
+      } as AxiosResponse<StopsResponseType[]>);
 
-    expect(store.state.uniqueStops[0].stop).toBe("A");
-  });
+      await store.dispatch("fetchStops");
 
-  it("should fetch stops from API", async () => {
-    const mockStops: StopsResponseType[] = [
-      { stop: "A", order: 1, line: 1, time: "00:00" },
-    ];
-    apiGetMock.mockResolvedValue({
-      data: mockStops,
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config: {},
-    } as AxiosResponse<StopsResponseType[]>);
+      expect(apiGetMock).toHaveBeenCalledWith("/stops");
+      expect(store.state.stops).toEqual(stopsData);
+      expect(store.state.uniqueStops.length).toBe(2);
+      expect(store.state.lines.length).toBe(1);
+    });
 
-    await store.dispatch("fetchStops");
+    it("setActiveLine should update the active line", () => {
+      const lineNumber = 1;
+      const lineData = { line: 1, active: false, stops: [] };
+      store.state.lines = [lineData];
+      store.dispatch("setActiveLine", lineNumber);
 
-    expect(apiGetMock).toHaveBeenCalledWith("/stops");
+      expect(store.state.activeLine).toEqual(lineData);
+      expect(store.state.lines[0].active).toBe(true);
+    });
 
-    expect(store.state.stops).toEqual(mockStops);
-  });
+    it("sortActiveLineStops should sort the stops in ascending order", () => {
+      const activeLine = {
+        line: 1,
+        active: false,
+        stops: [
+          { stop: "Stop 2", order: 2, time: ["10:30"], active: false },
+          { stop: "Stop 1", order: 1, time: ["10:00"], active: false },
+        ],
+      };
+      store.state.activeLine = activeLine;
+      store.state.activeLineStopsSortDirection = "dsc";
 
-  it("should trigger a notification on API error", async () => {
-    apiGetMock.mockRejectedValue(new Error("API Error"));
+      store.dispatch("sortActiveLineStops");
 
-    await store.dispatch("fetchStops");
+      expect(store.state.activeLine.stops).toEqual([
+        { stop: "Stop 1", order: 1, time: ["10:00"], active: false },
+        { stop: "Stop 2", order: 2, time: ["10:30"], active: false },
+      ]);
+      expect(store.state.activeLineStopsSortDirection).toBe("asc");
+    });
 
-    expect(store.state.notification).toEqual({
-      title: "Error",
-      text: "Failed to load data, please refresh page. If problem persists, contact us at page@admin.com",
-      type: "error",
-      timer: 10000,
-      active: true,
+    it("sortUniqueStops should sort the unique stops correctly", () => {
+      const uniqueStops = [
+        { stop: "Stop 2", order: 2 },
+        { stop: "Stop 1", order: 1 },
+      ];
+      store.state.uniqueStops = uniqueStops;
+      store.state.uniqueStopsSortDirection = "dsc";
+
+      store.dispatch("sortUniqueStops");
+
+      expect(store.state.uniqueStops).toEqual([
+        { stop: "Stop 1", order: 1 },
+        { stop: "Stop 2", order: 2 },
+      ]);
+      expect(store.state.uniqueStopsSortDirection).toBe("asc");
     });
   });
 });

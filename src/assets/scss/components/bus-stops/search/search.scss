@@ -3,6 +3,10 @@
   width: clamp(150px, 288px, 100%);
   background-color: transparent;
   margin: 8px;
+
+  &:has(.widget__input:focus) .widget__icon {
+    opacity: 0;
+  }
 }
 
 .widget__label {
@@ -24,6 +28,7 @@
   right: 15px;
   top: 50%;
   transform: translate(0, -50%);
+  transition: all 0.2s ease;
 }
 
 .widget__input {

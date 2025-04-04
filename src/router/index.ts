@@ -4,7 +4,7 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "base",
-    redirect: "/stops",
+    redirect: "/lines",
     component: () => import("../layouts/TimetableLayout.vue"),
     children: [
       {
@@ -13,7 +13,7 @@ export const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/bus-stops/StopsView.vue"),
       },
       {
-        path: "/bus-lines",
+        path: "/lines",
         name: "lines",
         component: () => import("../views/bus-lines/LinesView.vue"),
       },
@@ -21,7 +21,7 @@ export const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/:pathMatch(.*)*",
-    redirect: "/stops",
+    redirect: "/lines",
   },
 ];
 

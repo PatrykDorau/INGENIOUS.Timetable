@@ -5,7 +5,7 @@ import BusLineDetails from "@/components/bus-lines/details/BusLineDetails.vue";
 import DetailsPlaceholder from "@/components/base/DetailsPlaceholder.vue";
 import BusLineDetailsListItem from "@/components/bus-lines/details/BusLineDetailsListItem.vue";
 import IconComponent from "@/components/base/IconComponent.vue";
-import { LineType } from "@/types/StoreTypes";
+import { LineType } from "@/types/BusDataTypes";
 
 const mockStore = (activeLine?: LineType, stopsSortDir?: "dsc" | "asc") => {
   return createStore({

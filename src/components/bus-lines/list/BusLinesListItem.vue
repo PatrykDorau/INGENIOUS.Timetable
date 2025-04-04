@@ -10,7 +10,8 @@
 
 <script setup lang="ts">
 import { defineProps } from "vue";
-import { LineType, StoreStateType } from "@/types/StoreTypes";
+import { StoreStateType } from "@/types/StoreTypes";
+import { LineType } from "@/types/BusDataTypes";
 import { useStore } from "vuex";
 
 const props = defineProps<{ data: LineType }>();
